@@ -221,25 +221,41 @@ later.parse.cron = function (expr, hasSeconds) {
     return item.indexOf('#') > -1 || item.indexOf('L') > 0;
   }
 
-
   function itemSorter(a,b) {
     return isHash(a) && !isHash(b) ? 1 : 0;
   }
 
   /**
-  * Parses each of the fields in a cron expression.  The expression must
-  * include the seconds field, the year field is optional.
+  * Takes a cron expression and generate the relevant components.
   *
   * @param {String} expr: The cron expression to parse
+  * @param {Bool} exprIncludesSeconds: True if the cron expression includes a seconds field
   */
-  function parseExpr(expr) {
-    // replace every minute expression with one that parses
-    if (expr === '* * * * * *') {
-      expr = '0/1 * * * * *';
-    }
+  function getComponents(expr, exprIncludesSeconds) {
+    // split on whitespace
+    var components = (expr || "").trim().toUpperCase().split(/\s+/);
 
+    // expr doesn't include seconds, so set that component to 0, also handles (* * * * *) expression
+    if (!exprIncludesSeconds) {
+      components = ["0"].concat(components);
+    }
+    // replace every second (* * * * * *) expression with one that will work
+    else if (exprIncludesSeconds && components.length == 6 && components.every(function (e) {
+      return (e === "*");
+    })) {
+      components[0] = "0/1";
+    }
+    return components;
+  }
+
+  /**
+  * Parses each of the components in a cron expression.  The expression must
+  * include the seconds component, the year component is optional.
+  *
+  * @param {Array} components: The components of the cron expression to be parsed
+  */
+  function parseComponents(components) {
     var schedule = {schedules: [{}], exceptions: []},
-        components = expr.split(' '),
         field, f, component, items;
 
     for(field in FIELDS) {
@@ -260,6 +276,5 @@ later.parse.cron = function (expr, hasSeconds) {
     return schedule;
   }
 
-  var e = expr.toUpperCase();
-  return parseExpr(hasSeconds ? e : '0 ' + e);
+  return parseComponents(getComponents(expr, hasSeconds));
 };
