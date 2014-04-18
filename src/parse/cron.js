@@ -235,6 +235,26 @@ later.parse.cron = function (expr, hasSeconds) {
     // split on whitespace
     var components = (expr || "").trim().toUpperCase().split(/\s+/);
 
+    // let's see if we have any predefined schedules
+    if (components.length == 1) {
+      var c = components[0];
+      if (c === "@YEARLY" || c === "@ANNUALLY") {
+        return ["0", "0", "0", "1", "1", "*"];
+      }
+      if (c === "@MONTHLY") {
+        return ["0", "0", "0", "1", "*", "*"];
+      }
+      if (c === "@WEEKLY") {
+        return ["0", "0", "0", "*", "*", "0"];
+      }
+      if (c === "@DAILY") {
+        return ["0", "0", "0", "*", "*", "*"];
+      }
+      if (c === "@HOURLY") {
+        return ["0", "0", "*", "*", "*", "*"];
+      }
+    }
+
     // expr doesn't include seconds, so set that component to 0, also handles (* * * * *) expression
     if (!exprIncludesSeconds) {
       components = ["0"].concat(components);

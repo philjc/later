@@ -402,4 +402,56 @@ describe('Parse Cron', function() {
 		});
 
 	});
+
+  describe('predefined', function() {
+
+    it('should parse the yearly schedule', function() {
+      var expected = {s: [0], m: [0], h: [0], D: [1], M: [1]};
+      var p1 = parse('@yearly', true);
+      var p2 = parse('@yearly');
+      p1.schedules[0].should.eql(expected);
+      p2.schedules[0].should.eql(expected);
+		});
+
+    it('should parse the annually schedule', function() {
+      var expected = {s: [0], m: [0], h: [0], D: [1], M: [1]};
+      var p1 = parse('@annually', true);
+      var p2 = parse('@annually');
+      p1.schedules[0].should.eql(expected);
+      p2.schedules[0].should.eql(expected);
+    });
+
+    it('should parse the monthly schedule', function() {
+      var expected = {s: [0], m: [0], h: [0], D: [1]};
+      var p1 = parse('@monthly', true);
+      var p2 = parse('@monthly');
+      p1.schedules[0].should.eql(expected);
+      p2.schedules[0].should.eql(expected);
+    });
+
+    it('should parse the weekly schedule', function() {
+      var expected = {s: [0], m: [0], h: [0], d: [1]};
+      var p1 = parse('@weekly', true);
+      var p2 = parse('@weekly');
+      p1.schedules[0].should.eql(expected);
+      p2.schedules[0].should.eql(expected);
+    });
+
+    it('should parse the daily schedule', function() {
+      var expected = {s: [0], m: [0], h: [0]};
+      var p1 = parse('@daily', true);
+      var p2 = parse('@daily');
+      p1.schedules[0].should.eql(expected);
+      p2.schedules[0].should.eql(expected);
+    });
+
+    it('should parse the hourly schedule', function() {
+      var expected = {s: [0], m: [0]};
+      var p1 = parse('@hourly', true);
+      var p2 = parse('@hourly');
+      p1.schedules[0].should.eql(expected);
+      p2.schedules[0].should.eql(expected);
+    });
+
+  });
 });
