@@ -998,14 +998,40 @@ later = function() {
     function itemSorter(a, b) {
       return isHash(a) && !isHash(b) ? 1 : 0;
     }
-    function parseExpr(expr) {
-      if (expr === "* * * * * *") {
-        expr = "0/1 * * * * *";
+    function getComponents(expr, exprIncludesSeconds) {
+      var components = (expr || "").trim().toUpperCase().split(/\s+/);
+      if (components.length == 1) {
+        var c = components[0];
+        if (c === "@YEARLY" || c === "@ANNUALLY") {
+          return [ "0", "0", "0", "1", "1", "*" ];
+        }
+        if (c === "@MONTHLY") {
+          return [ "0", "0", "0", "1", "*", "*" ];
+        }
+        if (c === "@WEEKLY") {
+          return [ "0", "0", "0", "*", "*", "0" ];
+        }
+        if (c === "@DAILY") {
+          return [ "0", "0", "0", "*", "*", "*" ];
+        }
+        if (c === "@HOURLY") {
+          return [ "0", "0", "*", "*", "*", "*" ];
+        }
       }
+      if (!exprIncludesSeconds) {
+        components = [ "0" ].concat(components);
+      } else if (exprIncludesSeconds && components.length == 6 && components.every(function(e) {
+        return e === "*";
+      })) {
+        components[0] = "0/1";
+      }
+      return components;
+    }
+    function parseComponents(components) {
       var schedule = {
         schedules: [ {} ],
         exceptions: []
-      }, components = expr.split(" "), field, f, component, items;
+      }, field, f, component, items;
       for (field in FIELDS) {
         f = FIELDS[field];
         component = components[f[0]];
@@ -1019,8 +1045,7 @@ later = function() {
       }
       return schedule;
     }
-    var e = expr.toUpperCase();
-    return parseExpr(hasSeconds ? e : "0 " + e);
+    return parseComponents(getComponents(expr, hasSeconds));
   };
   later.parse.recur = function() {
     var schedules = [], exceptions = [], cur, curArr = schedules, curName, values, every, modifier, applyMin, applyMax, i, last;
